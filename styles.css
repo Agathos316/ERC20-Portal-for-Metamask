@@ -6,10 +6,10 @@ html {
 
 body {
     background-image:
-    url('images/backgroundMainPanel.png'),
-    url('images/backgroundPanelUpper.png'),
-    url('images/backgroundPanelLower.png'),
-    url('images/greySpot.png'),
+    url('./images/backgroundMainPanel.png'),
+    url('./images/backgroundPanelUpper.png'),
+    url('./images/backgroundPanelLower.png'),
+    url('./images/greySpot.png'),
     radial-gradient(#878685, rgb(0, 0, 0));
     background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat;
     background-size: 75cqmax, 75cqmin, 75cqmin, 2cqi, 100% 100%;
