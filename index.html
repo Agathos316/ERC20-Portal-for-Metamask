@@ -62,7 +62,7 @@
             // User clicks info icon for 'Past transactions'.
             function specialMessage_PastTxInfo() {
                 document.getElementById('notification').innerHTML = 
-                    'The past transactions are only those initiated in this portal and this browser. They are also specific to this account and the current network. There may be other transactions associated with this account not shown here (e.g. incoming txs, or outgoing txs initiated elsewhere). Transactions are shown with most recent ones first.<br><br>Transaction history is only stored using the tx hash, and the block number of the first confirmation. Transaction history is retained across multiple tabs/browser sessions. (* Microsoft Edge does not support tx history storage across browser sessions.)' +
+                    'The past transactions are only those initiated in this portal and this browser. They are also specific to this account and the current network. There may be other transactions associated with this account not shown here (e.g. incoming txs, or outgoing txs initiated elsewhere). Transactions are shown with most recent ones first.<br><br>Transaction history is only stored using the tx hash, and the block number of the first confirmation. Transaction history is retained across multiple tabs/browser sessions.<br><span style="font-size: 1cqmax;">(* Microsoft Edge does not support tx history storage across browser sessions.)</span>' +
                     '<br><br><span style="font-size: 1cqmax; font-family: monospace; cursor: pointer;" onclick="closeNotification()">Got it</span>';
                 document.getElementById('notification').style.visibility = "visible";
             }
