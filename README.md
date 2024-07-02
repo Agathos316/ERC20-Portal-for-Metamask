@@ -9,5 +9,6 @@ The dapp allows for:
 * Speeding up transactions with higher gas fees (via the Metamask extension) and monitoring the new transaction (in dapp)
 * Cancelling transactions (via the Metamask extension) and monitoring the cancellation progress (in dapp)
 * Transaction history specific for each Metamask account, network, and browser
+* Usage over multiple tabs/windows, all synchonrized in their UI
 
 (*) Dapp features have been tested in Brave, Chrome and Microsoft Edge. All features should work in all other browsers. The only exception being Microsoft Edge which does not allow transaction history to be retained across multiple browser sessions due to the browser clearing localStorage upon browser close.
