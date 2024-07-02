@@ -10,4 +10,4 @@ The dapp allows for:
 * Cancelling transactions (via the Metamask extension) and monitoring the cancellation progress (in dapp)
 * Transaction history specific for each Metamask account, network, and browser
 
-(*) Dapp features should work in all browsers, with Microsoft Edge being the only exception. Microsoft Edge does not allow transaction history to be retained across multiple browser sessions due to the browser clearing localStorage upon browser close.
+(*) Dapp features have been tested in Brave, Chrome and Microsoft Edge. All features should work in all other browsers. The only exception being Microsoft Edge which does not allow transaction history to be retained across multiple browser sessions due to the browser clearing localStorage upon browser close.
