@@ -11,4 +11,6 @@ The dapp allows for:
 * Transaction history specific for each Metamask account, network, and browser(*)
 * Usage over multiple tabs/windows, all synchonrized in their UI
 
+The dapp has been tested in a Windows environment only. Behaviour in iOS is untested.
+
 (*) Dapp features have been tested in Brave, Chrome and Microsoft Edge. All features should work in all other browsers. The only exception being Microsoft Edge which does not allow transaction history to be retained across multiple browser sessions due to the browser clearing localStorage upon browser close.
