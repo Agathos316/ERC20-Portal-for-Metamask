@@ -416,9 +416,8 @@ document.getElementById('processTransaction').addEventListener('click', async ()
        The event 'on("confirmation")' fires when the tx is included in a new block. Contains the receipt above, plus num confirmations ( = 1) and block hash. Not particularly useful.*/
     .on("error", (err) => {
         STATE_submittingTx = false;
-        displayNotification('There was an error submitting the transaction. Please reload the page to try fix this.', 5000);
+        displayNotification('There was an error submitting the transaction. Please reload the page to try fix this.', undefined);
         genericErrHandler(err,'fetching chain ID', false);
-        process.exit(1);
     })
     .catch((err) => {
         STATE_submittingTx = false;
