@@ -54,7 +54,7 @@
                 document.getElementById('notification').innerHTML = 
                     'The Max Fee (aka Max Gas Price) is the total you are willing to pay per unit of gas for this tx. The fee (aka Gas Price) is calculated in general as the \'Priority Fee + Base Fee\'. The Base Fee is determined by the network. Since the Base Fee changes from block to block, you must specify the maximum fee (per unit gas) you are willing to pay for the tx.' + 
                     '<br><br>The Safe Max Fee is calculated as <br>\'2 x Base Fee + Priority Fee\'. If used, this formula will ensure your tx remains marketable for at least six consecutive blocks, if not mined sooner. (See <a href="https://www.blocknative.com/blog/eip-1559-fees#3" target="blank">this link</a> for more information.)' +
-                    '<br><br>If you submit a tx at a lower gas price and it is slow to be confirmed, you have the option of speeding it up with a higher gas price, or cancelling it. (The \'Smart Transactions\' setting in Metamask must be turned off for this.)' +
+                    '<br><br>If you submit a tx at a lower gas price and it is slow to be confirmed, you have the option of speeding it up with a higher gas price, or cancelling it. (The 'Smart Transactions' setting in Metamask must be turned off for this.)' +
                     '<br><br><span style="font-size: 1cqmax; font-family: monospace; cursor: pointer;" onclick="closeNotification()">Got it</span>';
                 document.getElementById('notification').style.visibility = "visible";
             }
