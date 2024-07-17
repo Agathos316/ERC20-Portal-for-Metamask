@@ -64,41 +64,34 @@ const $txLog4 = document.getElementById('txLog4');
 /***************************************************
  * @dev Check if dapp is already connected to Metamask wallet.
  */
-// Detect which provider to use for metamask. Necessary because 'window.ethereum' is not stable.
-// It works sometimes and sometimes does not, in the same browser.
-try {
-    web3 = new Web3(window.web3.currentProvider); // For legacy browsers, but using since 'new Web3(window.ethereum)' intermittently does not work in my browser.
-} catch (err) {
-    // Metamask may not be installed.
-    // Setup the UI to await attempt at wallet connection.
-    $metamaskLogo.style.visibility = "visible";
-    $metamaskLogoGlow.style.visibility = "visible";
-    $metamaskText.style.visibility = "visible";
-
-    // Listen for a wallet connection request by the user (if relevant).
-    $metamaskLogo.addEventListener('click', async () => { connectWallet() })
-    $metamaskText.addEventListener('click', async () => { connectWallet() })
-}
-await web3.eth.getAccounts()    // Or use 'window.ethereum.request({ method: 'eth_accounts' })'.
-.then((accounts) => {
-    // If wallet connected, then initialize dapp with account information.
-    console.log('Connected account address(es): ' + accounts);
-    if (accounts.length > 0) {
-        initConnectedDapp();
-    // Else load dapp in read-only mode, awaiting user to initiate wallet connection.
-    } else {
-        // Setup the UI to await wallet connection.
+async function checkEthProvider() {
+    try {
+        // Detect which provider to use for Metamask.
+        if (window.ethereum) {
+            if (window.ethereum.isMetaMask) {
+                web3 = new Web3(window.ethereum);
+            }
+        } else if (window.web3.currentProvider.isMetaMask) {
+            web3 = new Web3(window.web3.currentProvider); // For legacy browsers
+        } else {
+            throw("Metamask may not be installed.");
+        }
+    } catch (err) {
+        // Metamask may not be installed.
+        // Setup the UI to await attempt at wallet connection.
         $metamaskLogo.style.visibility = "visible";
         $metamaskLogoGlow.style.visibility = "visible";
         $metamaskText.style.visibility = "visible";
-
+    
         // Listen for a wallet connection request by the user (if relevant).
         $metamaskLogo.addEventListener('click', async () => { connectWallet() })
         $metamaskText.addEventListener('click', async () => { connectWallet() })
     }
-})
+}
+await checkEthProvider();
+accounts = await window.ethereum.request({ method: "eth_accounts" })
 .catch((err) => {
-    genericErrHandler(err,'checking for connected accounts', false);
+    genericErrHandler(err,'checking for connected accounts. Permission may not be granted yet', false);
 
     // Presume no wallet connection.
     // Setup the UI to await wallet connection.
@@ -110,6 +103,21 @@ await web3.eth.getAccounts()    // Or use 'window.ethereum.request({ method: 'et
     $metamaskLogo.addEventListener('click', async () => { connectWallet() })
     $metamaskText.addEventListener('click', async () => { connectWallet() })
 });
+// If wallet connected, then initialize dapp with account information.
+if (accounts.length > 0) {
+    console.log('Connected account address(es): ' + accounts);
+    initConnectedDapp();
+// Else load dapp in read-only mode, awaiting user to initiate wallet connection.
+} else {
+    // Setup the UI to await wallet connection.
+    $metamaskLogo.style.visibility = "visible";
+    $metamaskLogoGlow.style.visibility = "visible";
+    $metamaskText.style.visibility = "visible";
+
+    // Listen for a wallet connection request by the user (if relevant).
+    $metamaskLogo.addEventListener('click', async () => { connectWallet() })
+    $metamaskText.addEventListener('click', async () => { connectWallet() })
+}
 
 
 /***************************************************
@@ -119,26 +127,7 @@ async function connectWallet() {
     // Check if a wallet is installed
     if (window.ethereum) {
         // Request the user to connect accounts (wallet will prompt the user).
-        await window.ethereum.request({method: 'eth_requestAccounts'})
-        .then(() => {
-            // Fade out the metamask logo and text.
-            fadeOutElement($metamaskLogo);
-            fadeOutElement($metamaskLogoGlow);
-            fadeOutElement($metamaskText);
-            // Initialize the dapp with the wallet connection and information.
-            setTimeout(() => {
-                $metamaskLogo.remove();
-                $metamaskLogoGlow.remove();
-                $metamaskText.remove();
-                document.getElementById('logo2').style.visibility = "visible";
-                document.getElementById('onStartNotice').style.visibility = "visible";
-
-                document.getElementById('onStartNotice').addEventListener('click', async () => {
-                    fadeOutElement(document.getElementById('onStartNotice'));
-                    setTimeout(() => { initConnectedDapp(); },1000);     // Wait for the fade function to complete.
-                });
-            },1000);     // Wait for the fade function to complete.
-        })
+        accounts = await window.ethereum.request({method: 'eth_requestAccounts'})
         .catch((err) => {
             // If EIP-1193 userRejectedRequest error (the user rejected the connection request).
             if (err.code === 4001) {
@@ -150,6 +139,23 @@ async function connectWallet() {
                 genericErrHandler(err,'connecting to wallet', false);
             }
         });
+        // Fade out the metamask logo and text.
+        fadeOutElement($metamaskLogo);
+        fadeOutElement($metamaskLogoGlow);
+        fadeOutElement($metamaskText);
+        // Initialize the dapp with the wallet connection and information.
+        setTimeout(() => {
+            $metamaskLogo.remove();
+            $metamaskLogoGlow.remove();
+            $metamaskText.remove();
+            document.getElementById('logo2').style.visibility = "visible";
+            document.getElementById('onStartNotice').style.visibility = "visible";
+
+            document.getElementById('onStartNotice').addEventListener('click', async () => {
+                fadeOutElement(document.getElementById('onStartNotice'));
+                setTimeout(() => { initConnectedDapp(); },1000);     // Wait for the fade function to complete.
+            });
+        },1000);     // Wait for the fade function to complete.
     } else {
         // Alert the user to download Metamask.
         displayNotification('Please install the Metamask browser extension.', 5000);
@@ -176,83 +182,72 @@ async function initConnectedDapp() {
 
     // Get currently connected network and prompt user to change if necessary.
     // If network acceptable, get accounts, current balance, and block number.
-    await window.ethereum.request({ method: "eth_chainId" })
-    .then(async (_chainId) => {
-        chainId = _chainId;
-
-        let tokenSelector = document.getElementById('tokenSelector');
-
-        // If on Ethereum Mainnet.
-        if (chainId == "0x1") {
-            document.getElementById('chainID').innerText = "Network: Ethereum Mainnet";
-            document.getElementById('chainID').style.color = "white";
-            etherscanEndpoint = 'https://api.etherscan.io/api';
-            etherscanApiKey = 'MI8AHYI1T98MZB61F55CSZCAWGFC8DR6DQ';
-            infuraEndpoint = 'https://mainnet.infura.io/v3/0bb37f2d858f4d15919ed5a06f862776';
-            infuraWSS = 'wss://mainnet.infura.io/ws/v3/0bb37f2d858f4d15919ed5a06f862776';
-            web3_InfuraWS = new Web3(new Web3.providers.WebsocketProvider(infuraWSS));
-            linkUrlPrefix = 'https://etherscan.io/tx/';
-            validChain = 1;
-            // Populate the token selector dropdown list.
-            tokenSelector.add(new Option('USDT','USDT'));
-            tokenSelector.add(new Option('BNB','BNB'));
-            tokenSelector.add(new Option('XRP','XRP'));
-            tokenSelector.add(new Option('LINK','LINK'));
-        // If on Sepolia Testnet.
-        } else if (chainId == "0xaa36a7") {
-            document.getElementById('chainID').innerText = "Network: Sepolia Testnet";
-            document.getElementById('chainID').style.color = "white";
-            etherscanEndpoint = 'https://api-sepolia.etherscan.io/api';
-            etherscanApiKey = 'MI8AHYI1T98MZB61F55CSZCAWGFC8DR6DQ';
-            infuraEndpoint = 'https://sepolia.infura.io/v3/0bb37f2d858f4d15919ed5a06f862776';
-            infuraWSS = 'wss://sepolia.infura.io/ws/v3/0bb37f2d858f4d15919ed5a06f862776';
-            web3_InfuraWS = new Web3(new Web3.providers.WebsocketProvider(infuraWSS));
-            linkUrlPrefix = 'https://sepolia.etherscan.io/tx/';
-            validChain = 2;
-            // Populate the token selector dropdown list.
-            tokenSelector.add(new Option('USDC','USDC'));
-        // Else prompt user to select a valid network.
-        } else {
-            document.getElementById('chainID').innerText = "Unrecognised network. Please select a valid network in the Metamask extension.";
-            document.getElementById('chainID').style.color = "rgb(255, 140, 0)";
-            displayNotification('Invalid network. ' + 
-                'Please click to switch to ' + 
-                '<span style="color: white; font-weight: bold; text-decoration-line: underline; cursor: pointer;" onclick="switchNetwork(0x1)">Ethereum</span> or ' + 
-                '<span style="color: white; font-weight: bold; text-decoration-line: underline; cursor: pointer;" onclick="switchNetwork(0xaa36a7)">Sepolia Testnet</span>', undefined);
-            validChain = 0;
-        }
-
-        // Get the connected accounts and current balance (progress through part of this, even if a valid network is not selected).
-        await web3.eth.getAccounts()
-        .then(async (_accounts) => {
-            accounts = _accounts;
-            // Display the account address.
-            document.getElementById('connectedAccount').innerText = accounts[0];
-            console.log('Number of connected accounts: ' + accounts.length);
-            if (validChain > 0) {
-                // Access the currently selected token contract.
-                await accessTokenContract()
-                .then(async () => {
-                    // Display the user's token balance.
-                    refreshAccountBalance();
-                    // Check to restore a prior dapp session.
-                    restorePriorSession();
-                })
-                .catch((err) => {
-                    displayNotification('There was an error accessing one or more token contracts. Please reload the page to try fix this.', undefined);
-                    genericErrHandler(err,'accessing token contract', false);
-                });
-            }
-        })
-        .catch((err) => {
-            displayNotification('There was an error fetching the wallet\'s accounts. Please reload the page to try again.', 5000);
-            genericErrHandler(err,'fetching accounts', false);
-        });
-    })
+    chainId = await window.ethereum.request({ method: "eth_chainId" })
     .catch((err) => {
-        displayNotification('There was an error fetching the current chain ID. Please reload the page to try again.', 5000);
+        displayNotification('There was an error fetching the current chain ID. Please reload the page to try again.', undefined);
         genericErrHandler(err,'fetching chain ID', false);
     });
+
+    let tokenSelector = document.getElementById('tokenSelector');
+
+    // If on Ethereum Mainnet.
+    if (chainId == "0x1") {
+        document.getElementById('chainID').innerText = "Network: Ethereum Mainnet";
+        document.getElementById('chainID').style.color = "white";
+        etherscanEndpoint = 'https://api.etherscan.io/api';
+        etherscanApiKey = 'MI8AHYI1T98MZB61F55CSZCAWGFC8DR6DQ';
+        infuraEndpoint = 'https://mainnet.infura.io/v3/0bb37f2d858f4d15919ed5a06f862776';
+        infuraWSS = 'wss://mainnet.infura.io/ws/v3/0bb37f2d858f4d15919ed5a06f862776';
+        web3_InfuraWS = new Web3(new Web3.providers.WebsocketProvider(infuraWSS));
+        linkUrlPrefix = 'https://etherscan.io/tx/';
+        validChain = 1;
+        // Populate the token selector dropdown list.
+        tokenSelector.add(new Option('USDT','USDT'));
+        tokenSelector.add(new Option('BNB','BNB'));
+        tokenSelector.add(new Option('XRP','XRP'));
+        tokenSelector.add(new Option('LINK','LINK'));
+    // If on Sepolia Testnet.
+    } else if (chainId == "0xaa36a7") {
+        document.getElementById('chainID').innerText = "Network: Sepolia Testnet";
+        document.getElementById('chainID').style.color = "white";
+        etherscanEndpoint = 'https://api-sepolia.etherscan.io/api';
+        etherscanApiKey = 'MI8AHYI1T98MZB61F55CSZCAWGFC8DR6DQ';
+        infuraEndpoint = 'https://sepolia.infura.io/v3/0bb37f2d858f4d15919ed5a06f862776';
+        infuraWSS = 'wss://sepolia.infura.io/ws/v3/0bb37f2d858f4d15919ed5a06f862776';
+        web3_InfuraWS = new Web3(new Web3.providers.WebsocketProvider(infuraWSS));
+        linkUrlPrefix = 'https://sepolia.etherscan.io/tx/';
+        validChain = 2;
+        // Populate the token selector dropdown list.
+        tokenSelector.add(new Option('USDC','USDC'));
+    // Else prompt user to select a valid network.
+    } else {
+        document.getElementById('chainID').innerText = "Unrecognised network. Please select a valid network in the Metamask extension.";
+        document.getElementById('chainID').style.color = "rgb(255, 140, 0)";
+        displayNotification('Invalid network. ' + 
+            'Please click to switch to ' + 
+            '<span style="color: white; font-weight: bold; text-decoration-line: underline; cursor: pointer;" onclick="switchNetwork(0x1)">Ethereum</span> or ' + 
+            '<span style="color: white; font-weight: bold; text-decoration-line: underline; cursor: pointer;" onclick="switchNetwork(0xaa36a7)">Sepolia Testnet</span>', undefined);
+        validChain = 0;
+    }
+
+    // Get the current balance (progress through part of this, even if a valid network is not selected).
+    // Display the account address.
+    document.getElementById('connectedAccount').innerText = accounts[0];
+    console.log('Number of connected accounts: ' + accounts.length);
+    if (validChain > 0) {
+        // Access the currently selected token contract.
+        await accessTokenContract()
+        .then(async () => {
+            // Display the user's token balance.
+            refreshAccountBalance();
+            // Check to restore a prior dapp session.
+            restorePriorSession();
+        })
+        .catch((err) => {
+            displayNotification('There was an error accessing one or more token contracts. Please reload the page to try fix this.', undefined);
+            genericErrHandler(err,'accessing token contract', false);
+        });
+    }
 
     // On network change events, reload the page.
     window.ethereum.on("chainChanged", (chainId) => { window.location.reload(true); });
