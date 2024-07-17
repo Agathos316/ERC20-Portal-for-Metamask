@@ -82,7 +82,7 @@ async function checkEthProvider() {
         $metamaskLogo.style.visibility = "visible";
         $metamaskLogoGlow.style.visibility = "visible";
         $metamaskText.style.visibility = "visible";
-    
+
         // Listen for a wallet connection request by the user (if relevant).
         $metamaskLogo.addEventListener('click', async () => { connectWallet() })
         $metamaskText.addEventListener('click', async () => { connectWallet() })
@@ -104,19 +104,22 @@ accounts = await window.ethereum.request({ method: "eth_accounts" })
     $metamaskText.addEventListener('click', async () => { connectWallet() })
 });
 // If wallet connected, then initialize dapp with account information.
-if (accounts.length > 0) {
-    console.log('Connected account address(es): ' + accounts);
-    initConnectedDapp();
-// Else load dapp in read-only mode, awaiting user to initiate wallet connection.
-} else {
-    // Setup the UI to await wallet connection.
-    $metamaskLogo.style.visibility = "visible";
-    $metamaskLogoGlow.style.visibility = "visible";
-    $metamaskText.style.visibility = "visible";
+if (accounts != undefined) {
+    console.log(accounts);
+    if (accounts.length > 0) {
+        console.log('Connected account address(es): ' + accounts);
+        initConnectedDapp();
+    // Else load dapp in read-only mode, awaiting user to initiate wallet connection.
+    } else {
+        // Setup the UI to await wallet connection.
+        $metamaskLogo.style.visibility = "visible";
+        $metamaskLogoGlow.style.visibility = "visible";
+        $metamaskText.style.visibility = "visible";
 
-    // Listen for a wallet connection request by the user (if relevant).
-    $metamaskLogo.addEventListener('click', async () => { connectWallet() })
-    $metamaskText.addEventListener('click', async () => { connectWallet() })
+        // Listen for a wallet connection request by the user (if relevant).
+        $metamaskLogo.addEventListener('click', async () => { connectWallet() })
+        $metamaskText.addEventListener('click', async () => { connectWallet() })
+    }
 }
 
 
@@ -244,7 +247,7 @@ async function initConnectedDapp() {
             restorePriorSession();
         })
         .catch((err) => {
-            displayNotification('There was an error accessing one or more token contracts. Please reload the page to try fix this.', undefined);
+            displayNotification('There was an error accessing account balance and prior session data. Please reload the page to try fix this.', undefined);
             genericErrHandler(err,'accessing token contract', false);
         });
     }
