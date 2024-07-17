@@ -66,7 +66,19 @@ const $txLog4 = document.getElementById('txLog4');
  */
 // Detect which provider to use for metamask. Necessary because 'window.ethereum' is not stable.
 // It works sometimes and sometimes does not, in the same browser.
-web3 = new Web3(window.web3.currentProvider); // For legacy browsers, but using since 'new Web3(window.ethereum)' intermittently does not work in my browser.
+try {
+    web3 = new Web3(window.web3.currentProvider); // For legacy browsers, but using since 'new Web3(window.ethereum)' intermittently does not work in my browser.
+} catch (err) {
+    // Metamask may not be installed.
+    // Setup the UI to await attempt at wallet connection.
+    $metamaskLogo.style.visibility = "visible";
+    $metamaskLogoGlow.style.visibility = "visible";
+    $metamaskText.style.visibility = "visible";
+
+    // Listen for a wallet connection request by the user (if relevant).
+    $metamaskLogo.addEventListener('click', async () => { connectWallet() })
+    $metamaskText.addEventListener('click', async () => { connectWallet() })
+}
 await web3.eth.getAccounts()    // Or use 'window.ethereum.request({ method: 'eth_accounts' })'.
 .then((accounts) => {
     // If wallet connected, then initialize dapp with account information.
