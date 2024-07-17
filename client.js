@@ -66,17 +66,7 @@ const $txLog4 = document.getElementById('txLog4');
  */
 // Detect which provider to use for metamask. Necessary because 'window.ethereum' is not stable.
 // It works sometimes and sometimes does not, in the same browser.
-try {
-    if (window.ethereum) {
-        if (window.ethereum.isMetaMask) {
-            web3 = new Web3(window.ethereum);
-        }
-    } else {
-        web3 = new Web3(window.web3.currentProvider); // For legacy browsers
-    }
-} catch (err) {
-    web3 = new Web3(window.web3.currentProvider); // For legacy browsers
-}
+web3 = new Web3(window.web3.currentProvider); // For legacy browsers, but using since 'new Web3(window.ethereum)' intermittently does not work in my browser.
 await web3.eth.getAccounts()    // Or use 'window.ethereum.request({ method: 'eth_accounts' })'.
 .then((accounts) => {
     // If wallet connected, then initialize dapp with account information.
