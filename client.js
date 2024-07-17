@@ -68,7 +68,7 @@ const $txLog4 = document.getElementById('txLog4');
 // It works sometimes and sometimes does not, in the same browser.
 if ((window.ethereum).isMetaMask) {
     web3 = new Web3(window.ethereum);
-} else if ((window.web3.currentProvider).isMetaMask) {*/
+} else if ((window.web3.currentProvider).isMetaMask) {
     web3 = new Web3(window.web3.currentProvider); // For legacy browsers
 }
 await web3.eth.getAccounts()    // Or use 'window.ethereum.request({ method: 'eth_accounts' })'.
