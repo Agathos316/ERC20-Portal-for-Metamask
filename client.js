@@ -725,6 +725,7 @@ async function processLatestBlock(blockNumber) {
         .catch((err) => {
             displayNotification('The tx you just submitted has made it to the mempool, but an error occured while attempting to track it from there. Please monitor the tx in your metamask extension. If the transaction is mined it will still show in the \'Past transactions\' list in this dapp.', 8000);
             genericErrHandler(err,'fetching transaction data', false);
+            setTimeout(() => { messageBroadcast('ReloadTxPortal'); window.location.reload(true); }, 8000);
         });
 
     }
